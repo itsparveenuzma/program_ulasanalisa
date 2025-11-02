@@ -108,6 +108,32 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown("""
+<style>
+/* --- MOBILE FIX: tampilkan hamburger, atur tumpang tindih --- */
+@media (max-width: 900px) {
+  /* Pastikan header Streamlit (yang memuat hamburger) terlihat
+     dan diletakkan DI BAWAH navbar kustom */
+  [data-testid="stHeader"]{
+    display: flex !important;
+    position: fixed;
+    top: 90px;           /* letakkan tepat di bawah navbar tinggi 80–90px */
+    left: 0; right: 0;
+    background: transparent;
+    z-index: 1000000;    /* di atas navbar */
+  }
+
+  /* Navbar tetap di paling atas */
+  .navbar{ top: 0; z-index: 999999; }
+
+  /* Turunkan konten & sidebar sesuai tinggi gabungan navbar + header */
+  [data-testid="stAppViewContainer"] > .main{ margin-top: 140px; } /* 90 + ~50 */
+  [data-testid="stSidebar"]{ top: 140px; }
+}
+</style>
+""", unsafe_allow_html=True)
+
+
 # HALAMAN BERANDA
 if page == "home":
     st.markdown("## Selamat datang di **UlasAnalisa**")
