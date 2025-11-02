@@ -267,7 +267,7 @@ elif page == "tentang":
     st.markdown("### Pengembang Website")
     c1, c2 = st.columns([1, 2])
     with c1:
-        st.image("static/fotoku.png", width=180)
+        st.image("static/fotoku.jpg", width=180)
     with c2:
         st.markdown("""
         **Nama** : Parveen Uzma Habidin  
