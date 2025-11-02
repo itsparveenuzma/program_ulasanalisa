@@ -133,6 +133,40 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+/* Sesuaikan dengan tinggi navbar kamu */
+:root{ --nav-h: 90px; }   /* navbar 80–90px? ganti di sini */
+
+/* Header/hamburger tetap di bawah navbar */
+@media (max-width: 900px){
+  [data-testid="stHeader"]{
+    display:flex !important;
+    position:fixed;
+    top:var(--nav-h);
+    left:0; right:0;
+    background:transparent;
+    z-index:1000000;
+    height:48px;          /* tinggi approx header */
+  }
+
+  /* NAIKKAN posisi SIDEBAR: sejajar dengan bawah navbar */
+  [data-testid="stSidebar"]{
+    top:var(--nav-h) !important;
+    height:calc(100vh - var(--nav-h)) !important;
+  }
+
+  /* Kurangi padding atas di dalam sidebar (biar tidak terlihat turun) */
+  [data-testid="stSidebar"] .block-container{ padding-top:.5rem !important; }
+
+  /* Konten turun sesuai total nav + header */
+  [data-testid="stAppViewContainer"] > .main{
+    margin-top:calc(var(--nav-h) + 48px) !important;
+  }
+}
+</style>
+""", unsafe_allow_html=True)
+
 
 # HALAMAN BERANDA
 if page == "home":
