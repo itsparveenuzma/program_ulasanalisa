@@ -200,8 +200,6 @@ if page == "home":
         st.markdown("### Step 1 (Website)")
         st.write("Copy tautan aplikasi dari halaman Google Play Store yang ingin dianalisis.")
 
-    st.divider()
-
     # Step 2 
     c1, c2 = st.columns([1, 1])
     with c1:
@@ -210,8 +208,6 @@ if page == "home":
         st.markdown("### Step 2")
         st.write("Buka halaman **Prediksi** di UlasAnalisa, lalu **paste** tautan aplikasi pada kolom yang disediakan.")
 
-    st.divider()
-
     # Step 3
     c1, c2 = st.columns([1, 1])
     with c1:
@@ -219,8 +215,6 @@ if page == "home":
     with c2:
         st.markdown("### Step 3")
         st.write("Atur **model**, **bahasa**, **negara**, **jumlah ulasan**, dan **urutan** sesuai kebutuhan.")
-
-    st.divider()
 
     # Step 4 
     c1, c2 = st.columns([1, 1])
@@ -241,16 +235,12 @@ if page == "home":
     with g3: st.image("static/4.png", use_container_width=True)
     st.markdown("**Step 1 (Mobile)** – Buka Google Play Store, pilih aplikasinya, ketuk **⋮ → Share → Copy URL**.")
 
-    st.divider()
-
     # Step 2 
     m1, m2 = st.columns([1, 1])
     with m1: st.image("static/8.png", use_container_width=True)
     with m2:
         st.markdown("### Step 2 (Mobile)")
         st.write("Masuk ke website **UlasAnalisa** → buka halaman **Prediksi** → **paste** tautan aplikasi.")
-
-    st.divider()
 
     # Step 3 (
     m1, m2 = st.columns([1, 1])
@@ -259,16 +249,12 @@ if page == "home":
         st.markdown("### Step 3 (Mobile)")
         st.write("Ketuk tombol **Prediksi** untuk mulai.")
 
-    st.divider()
-
     # Step 4 
     m1, m2 = st.columns([1, 1])
     with m1: st.image("static/10.png", use_container_width=True)
     with m2:
         st.markdown("### Step 4 (Mobile)")
         st.write("Sesuaikan **Pengaturan** (model/bahasa/negara/jumlah ulasan/urutan) sesuai kebutuhan.")
-
-    st.divider()
 
     # Step 5 
     m1, m2 = st.columns([1, 1])
