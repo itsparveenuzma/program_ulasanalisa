@@ -282,7 +282,7 @@ elif page == "tentang":
     a, b = st.columns(2)
     with a:
         st.markdown("### Dosen Pembimbing")
-        st.image("static/pak_tri.webp", width=140)
+        st.image("static/pak_tri.jpg", width=140)
         st.markdown("Tri Sutrisno, S.Si., M.Sc.")
     with b:
         st.markdown("### Institusi")
