@@ -256,20 +256,20 @@ elif page == "prediksi":
 
     #SIDEBAR
     st.markdown("""
-<style>
-/* geser sidebar biar ga ketutup navbar */
-[data-testid="stSidebar"] {
-    top: 90px;
-}
+    <style>
+    /* geser sidebar biar ga ketutup navbar */
+    [data-testid="stSidebar"] {
+        top: 90px;
+    }
 
-/* geser tombol collapse-nya juga */
-[data-testid="stSidebarCollapseButton"] {
-    top: 95px;
-    left: 6px;
-    z-index: 100000;
-}
-</style>
-""", unsafe_allow_html=True)
+    /* geser tombol collapse-nya juga */
+    [data-testid="stSidebarCollapseButton"] {
+        top: 95px;
+        left: 6px;
+        z-index: 100000;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     with st.sidebar:
         st.header("Pengaturan")
