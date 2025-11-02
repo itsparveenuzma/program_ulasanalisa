@@ -1,4 +1,5 @@
 import re
+import io
 import base64
 from pathlib import Path
 
@@ -6,6 +7,7 @@ import pandas as pd
 import streamlit as st
 import joblib
 from google_play_scraper import app as gp_app, reviews, Sort
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 # PAGE CONFIG
 st.set_page_config(
@@ -14,6 +16,17 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# SESSION STATE BOOTSTRAP
+for k, v in {
+    "results": {},
+    "app_id": None,
+    "csv_pred": None,
+    "csv_dist": None,
+    "is_combo": False,
+}.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
 
 st.markdown("""
 <style>
@@ -174,14 +187,13 @@ if page == "home":
     st.markdown("### Apa itu **UlasAnalisa?**")
     st.markdown(
         """
-        **UlasAnalisa** adalah website yang membantu menganalisis sentimen ulasan aplikasi di Google Play Store secara otomatis dan menyajikannya dalam bentuk tabel yang mudah dipahami.  
+        **UlasAnalisa** adalah website yang membantu menganalisis sentimen ulasan aplikasi di Google Play Store secara otomatis
+        dan menyajikannya dalam bentuk tabel yang mudah dipahami.  
         Hasil sentimen bisa diunduh dalam bentuk **.csv**.
         """
     )
 
     st.markdown("### Bagaimana Cara Memakainya?")
-
-    # STEP 1 (Website)
     col1, col2 = st.columns([1, 1])
     with col1:
         st.image("static/1.png", caption="Tampilan Google Play di Website", use_container_width=True)
@@ -191,142 +203,113 @@ if page == "home":
 
     st.markdown("---")
 
-    # STEP 1 (Handphone)
     st.markdown("### Step 1 (Handphone)")
     sp1, c1, c2, c3, sp2 = st.columns([1, 2, 2, 2, 1])
-    with c1:
-        st.image("static/2.png", width=230)
-
-    with c2:
-        st.image("static/3.png", width=230)
-
-    with c3:
-        st.image("static/4.png", width=230)
-    st.write(
-        "Buka Google Play Store di HP → cari aplikasinya → ketuk **⋮ → Share** → pilih **Copy URL**."
-    )
+    with c1: st.image("static/2.png", width=230)
+    with c2: st.image("static/3.png", width=230)
+    with c3: st.image("static/4.png", width=230)
+    st.write("Buka Google Play Store di HP → cari aplikasinya → ketuk **⋮ → Share** → pilih **Copy URL**.")
 
     st.markdown("---")
 
-    # STEP 2
+    #STEP 2
     col1, col2 = st.columns([1, 1])
-    with col1:
-        st.image("static/5.png", use_container_width=True)
+    with col1: st.image("static/5.png", use_container_width=True)
     with col2:
         st.markdown("### Step 2")
-        st.write("Paste / tempel link URL tadi ke kolom input di halaman **Prediksi**.")
+        st.write("Tempel link ke halaman **Prediksi**.")
 
     st.markdown("---")
 
-    # STEP 3
+    #STEP 3
     col1, col2 = st.columns([1, 1])
-    with col1:
-        st.image("static/6.png", use_container_width=True)
+    with col1: st.image("static/6.png", use_container_width=True)
     with col2:
         st.markdown("### Step 3")
-        st.write("Atur pengaturan (model, bahasa, negara, jumlah ulasan, urutan) sesuai kebutuhan.")
+        st.write("Atur model, bahasa, negara, jumlah ulasan, dan urutan.")
 
     st.markdown("---")
 
-    # STEP 4
+    #STEP 4
     col1, col2 = st.columns([1, 1])
-    with col1:
-        st.image("static/7.png", use_container_width=True)
+    with col1: st.image("static/7.png", use_container_width=True)
     with col2:
         st.markdown("### Step 4")
-        st.write("Klik tombol **Prediksi** → sistem akan ambil ulasan dan menampilkan hasil serta tombol download CSV.")
+        st.write("Klik **Prediksi** → hasil dan tombol download muncul.")
 
 # HALAMAN TENTANG
 elif page == "tentang":
     st.markdown("### Pengembang Website")
-    col1, col2 = st.columns([1, 2])
-    with col1:
+    c1, c2 = st.columns([1, 2])
+    with c1:
         st.image("static/fotoku.png", width=180)
-    with col2:
-        st.markdown(
-            """
-            **Nama** : Parveen Uzma Habidin  
-            **NIM** : 535220226  
-            **Jurusan** : Teknik Informatika  
-            **Fakultas** : Teknik Informasi  
+    with c2:
+        st.markdown("""
+        **Nama** : Parveen Uzma Habidin  
+        **NIM** : 535220226  
+        **Jurusan** : Teknik Informatika  
+        **Fakultas** : Teknik Informasi  
 
-            **Topik Skripsi** :  
-            Perencanaan Analisis Sentimen Aplikasi Sosial Media Pada Google Play Store Menggunakan Model Random Forest, Support Vector Machine dan TF-IDF
-            """
-        )
-
+        **Topik Skripsi** :  
+        Perencanaan Analisis Sentimen Aplikasi Sosial Media Pada Google Play Store Menggunakan Model Random Forest, Support Vector Machine dan TF-IDF
+        """)
     st.markdown("---")
-
-    col1, col2 = st.columns(2)
-    with col1:
+    a, b = st.columns(2)
+    with a:
         st.markdown("### Dosen Pembimbing")
         st.image("static/pak_tri.webp", width=140)
         st.markdown("Tri Sutrisno, S.Si., M.Sc.")
-    with col2:
+    with b:
         st.markdown("### Institusi")
-        st.image("static/logo_untar.png", width=180)
+        st.image("static/Logo_untar.png", width=180)
         st.markdown("**Universitas Tarumanagara**")
 
 
-#HALAMAN PREDIKSI
+# HALAMAN PREDIKSI
 elif page == "prediksi":
+
     st.title("Prediksi Sentimen dari Link Google Play")
     st.caption("Masukkan link aplikasi dari Google Play Store, lalu sistem akan prediksi sentimennya")
 
-    #ARTIFACTS PATH
+    #ARTIFACT PATH
     VEC_PATH = Path("Artifacts") / "tfidf_vectorizer.joblib"
     SVM_PATH = Path("Artifacts") / "svm_rbf_model.joblib"
-    RF_PATH = Path("Artifacts") / "random_forest_model.joblib"
+    RF_PATH  = Path("Artifacts") / "random_forest_model.joblib"
 
     @st.cache_resource
     def load_artifacts():
         vec = joblib.load(VEC_PATH)
         svm = joblib.load(SVM_PATH) if SVM_PATH.exists() else None
-        rf = joblib.load(RF_PATH) if RF_PATH.exists() else None
+        rf  = joblib.load(RF_PATH)  if RF_PATH.exists()  else None
         return vec, svm, rf
 
     try:
         tfidf_vectorizer, svm_model, rf_model = load_artifacts()
     except Exception as e:
-        st.error(
-            f"Gagal memuat artifacts.\n"
-            f"Vectorizer: `{VEC_PATH}` (wajib)\n"
-            f"Model: `{SVM_PATH}` atau `{RF_PATH}` (minimal salah satu)\n\n"
-            f"Detail: {e}"
-        )
+        st.error(f"Gagal memuat artifacts.\nDetail: {e}")
         st.stop()
-
-    #SESSION STATE
-    for k, v in dict(pred_df=None, dist_df=None, app_id=None, csv_pred=None, csv_dist=None).items():
-        if k not in st.session_state:
-            st.session_state[k] = v
 
     #MODEL
     avail = []
-    if svm_model is not None:
-        avail.append("SVM (RBF)")
-    if rf_model is not None:
-        avail.append("RandomForest")
+    if svm_model is not None: avail.append("SVM (RBF)")
+    if rf_model  is not None: avail.append("RandomForest")
+    if svm_model is not None and rf_model is not None: avail.append("SVM dan RandomForest")
     if not avail:
-        st.error(
-            "Tidak ada model yang tersedia. Letakkan minimal salah satu model: "
-            "SVM (`svm_rbf_model.joblib`) atau RF (`random_forest_model.joblib`)."
-        )
+        st.error("Tidak ada model yang tersedia.")
         st.stop()
 
     #SIDEBAR
     with st.sidebar:
         st.header("Pengaturan")
         model_name = st.selectbox("Pilih model", avail, index=0)
-        lang = st.selectbox("Bahasa ulasan", ["id", "en"], index=0)
-        country = st.selectbox("Negara", ["id", "us"], index=0)
-        n_reviews = st.slider("Jumlah ulasan di-scrape", 50, 1000, 200, 50)
-        sort_opt = st.selectbox("Urutkan", ["NEWEST", "MOST_RELEVANT"], index=0)
-        run = st.button("Prediksi")
+        lang       = st.selectbox("Bahasa ulasan", ["id", "en"], index=0)
+        country    = st.selectbox("Negara", ["id", "us"], index=0)
+        n_reviews  = st.slider("Jumlah ulasan di-scrape", 50, 1000, 200, 50)
+        sort_opt   = st.selectbox("Urutkan", ["NEWEST", "MOST_RELEVANT"], index=0)
+        run        = st.button("Prediksi")
 
     #HELPER SCRAPE
     ID_RE = re.compile(r"[?&]id=([a-zA-Z0-9._]+)")
-
     def parse_app_id(text: str) -> str:
         t = (text or "").strip()
         m = ID_RE.search(t)
@@ -338,26 +321,20 @@ elif page == "prediksi":
         got, token = [], None
         while len(got) < n:
             batch, token = reviews(
-                app_id,
-                lang=lang,
-                country=country,
-                sort=sort,
-                count=min(200, n - len(got)),
-                continuation_token=token,
+                app_id, lang=lang, country=country, sort=sort,
+                count=min(200, n-len(got)), continuation_token=token
             )
             got.extend(batch)
             if token is None:
                 break
         if not got:
-            return pd.DataFrame(
-                columns=["content", "score", "at", "replyContent", "userName"]
-            )
+            return pd.DataFrame(columns=["content", "score", "at", "replyContent", "userName"])
         return pd.DataFrame(got)
 
     #INPUT LINK
     link = st.text_input(
         "Masukkan link Google Play / package id",
-        placeholder="https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically",
+        placeholder="https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically"
     )
 
     #PROSES PREDIKSI
@@ -367,7 +344,6 @@ elif page == "prediksi":
             st.error("Package id tidak valid.")
             st.stop()
 
-        # meta app
         try:
             meta = gp_app(app_id, lang=lang, country=country)
             st.markdown(
@@ -378,74 +354,146 @@ elif page == "prediksi":
             )
         except Exception:
             st.info(f"Package: `{app_id}`")
-
-        # ambil ulasan
+            
+        #ambil ulasan
         with st.spinner(f"Mengambil {n_reviews} ulasan..."):
-            df = scrape_reviews(
-                app_id, lang=lang, country=country, n=n_reviews, sort=sort_opt
-            )
+            df = scrape_reviews(app_id, lang=lang, country=country, n=n_reviews, sort=sort_opt)
         if df.empty:
             st.warning("Tidak ada ulasan yang diambil.")
             st.stop()
 
-        # rapikan kolom
+        #merapikan kolom
         df = df.rename(columns={"content": "text", "score": "rating", "at": "date"})
         cols = ["text", "rating", "date", "userName", "replyContent"]
-        df = df[[c for c in cols if c in df.columns]].copy()
+        df  = df[[c for c in cols if c in df.columns]].copy()
 
-        # tfidf + prediksi
+        #tf-idf + prediksi
         with st.spinner("Mengubah fitur (TF-IDF) dan memprediksi"):
-            X_tfidf = tfidf_vectorizer.transform(df["text"].astype(str))
-            X_dense = X_tfidf.toarray()
-            model = svm_model if model_name == "SVM (RBF)" else rf_model
-            if model is None:
-                st.error(f"Model {model_name} tidak tersedia.")
-                st.stop()
-            y_pred = model.predict(X_dense)
+            X = tfidf_vectorizer.transform(df["text"].astype(str)).toarray()
+            results = {}
+            if model_name == "SVM (RBF)":
+                y = svm_model.predict(X)
+                t = df.copy(); t["pred"] = y; t["pred_label"] = t["pred"].map({1:"Positive", 0:"Negative"})
+                results["SVM (RBF)"] = t
+            elif model_name == "RandomForest":
+                y = rf_model.predict(X)
+                t = df.copy(); t["pred"] = y; t["pred_label"] = t["pred"].map({1:"Positive", 0:"Negative"})
+                results["RandomForest"] = t
+            else:
+                y_svm = svm_model.predict(X)
+                t1 = df.copy(); t1["pred"] = y_svm; t1["pred_label"] = t1["pred"].map({1:"Positive", 0:"Negative"})
+                results["SVM (RBF)"] = t1
+                y_rf  = rf_model.predict(X)
+                t2 = df.copy(); t2["pred"] = y_rf; t2["pred_label"] = t2["pred"].map({1:"Positive", 0:"Negative"})
+                results["RandomForest"] = t2
 
-        sent_map = {1: "Positive", 0: "Negative"}
-        df["pred"] = y_pred
-        df["pred_label"] = df["pred"].map(sent_map)
-        dist = (
-            df["pred_label"]
-            .value_counts()
-            .rename_axis("Sentiment")
-            .reset_index(name="Count")
+        st.session_state.results = results
+        st.session_state.app_id  = app_id
+        st.session_state.is_combo = (model_name == "SVM dan RandomForest")
+
+        # 2 model
+        if st.session_state.is_combo:
+            df_svm = results["SVM (RBF)"]
+            df_rf  = results["RandomForest"]
+
+            out = io.BytesIO()
+            with pd.ExcelWriter(out, engine="xlsxwriter") as w:
+                df_svm.to_excel(w, sheet_name="SVM (RBF)", index=False)
+                df_rf.to_excel(w,  sheet_name="RandomForest", index=False)
+            out.seek(0)
+            st.session_state.csv_pred = out.getvalue()
+
+            dist_svm = df_svm["pred_label"].value_counts().rename_axis("sentiment").reset_index(name="count")
+            dist_rf  = df_rf["pred_label"].value_counts().rename_axis("sentiment").reset_index(name="count")
+            out2 = io.BytesIO()
+            with pd.ExcelWriter(out2, engine="xlsxwriter") as w:
+                dist_svm.to_excel(w, sheet_name="SVM (RBF)", index=False)
+                dist_rf.to_excel(w,  sheet_name="RandomForest", index=False)
+            out2.seek(0)
+            st.session_state.csv_dist = out2.getvalue()
+        else:
+            key = next(iter(results))
+            dfk = results[key]
+            st.session_state.csv_pred = dfk.to_csv(index=False).encode("utf-8")
+            st.session_state.csv_dist = (
+                dfk["pred_label"]
+                .value_counts()
+                .rename_axis("sentiment")
+                .reset_index(name="count")
+                .to_csv(index=False)
+                .encode("utf-8")
+            )
+
+
+# OUTPUT / HASIL
+if st.session_state.results and page == "prediksi":
+    items = list(st.session_state.results.items())
+    cols = st.columns(len(items))
+    for c, (name, dfm) in zip(cols, items):
+        with c:
+            st.subheader(f"Distribusi Sentimen – {name}")
+            dist = dfm["pred_label"].value_counts().rename_axis("Sentiment").reset_index(name="Count")
+            st.bar_chart(dist.set_index("Sentiment"))
+            st.subheader(f"Sampel Hasil Prediksi – {name}")
+            st.dataframe(dfm.head(20), use_container_width=True)
+
+    c1, c2, c3, c4, c5 = st.columns([1, 2, 2, 2, 1])
+    with c2:
+        st.download_button(
+            "Download Hasil Prediksi",
+            data=st.session_state.csv_pred,
+            file_name=(
+                f"{st.session_state.app_id}_prediksi_ulasan.xlsx"
+                if st.session_state.is_combo else
+                f"{st.session_state.app_id}_prediksi_ulasan.csv"
+            ),
+            mime=(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                if st.session_state.is_combo else
+                "text/csv"
+            ),
+            type="primary",
+            key="dl_pred"
+        )
+    with c4:
+        st.download_button(
+            "Download Distribusi Sentimen",
+            data=st.session_state.csv_dist,
+            file_name=(
+                f"{st.session_state.app_id}_distribusi_sentimen.xlsx"
+                if st.session_state.is_combo else
+                f"{st.session_state.app_id}_distribusi_sentimen.csv"
+            ),
+            mime=(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                if st.session_state.is_combo else
+                "text/csv"
+            ),
+            type="primary",
+            key="dl_dist"
         )
 
-        st.session_state.app_id = app_id
-        st.session_state.pred_df = df
-        st.session_state.dist_df = dist
-        st.session_state.csv_pred = df.to_csv(index=False).encode("utf-8")
-        st.session_state.csv_dist = dist.to_csv(index=False).encode("utf-8")
+    def rating_to_label(r):
+        if pd.isna(r): return None
+        return 1 if r >= 4 else 0
 
-    #TAMPILKAN HASIL
-    if st.session_state.pred_df is not None:
-        st.subheader("Distribusi Sentimen (Prediksi)")
-        dist_df = st.session_state.dist_df.set_index("Sentiment")
-        st.bar_chart(dist_df)
-
-        st.subheader("Sampel Hasil Prediksi")
-        st.dataframe(st.session_state.pred_df.head(20), use_container_width=True)
-
-        left, middle, right = st.columns(3)
-        with left:
-            st.download_button(
-                "Download Hasil Prediksi (CSV)",
-                data=st.session_state.csv_pred,
-                file_name=f"{st.session_state.app_id}_prediksi_ulasan.csv",
-                mime="text/csv",
-                key="dl_pred",
-                type="primary",
-            )
-        with middle:
-            st.download_button(
-                "Download Distribusi Sentimen (CSV)",
-                data=st.session_state.csv_dist,
-                file_name=f"{st.session_state.app_id}_distribusi_sentimen.csv",
-                mime="text/csv",
-                key="dl_dist",
-                type="primary",
-            )
+    metrics = []
+    for name, dfm in st.session_state.results.items():
+        d = dfm.copy()
+        d["true_label"] = d["rating"].apply(rating_to_label)
+        d = d.dropna(subset=["true_label"])
+        if d.empty: continue
+        metrics.append({
+            "Model": name,
+            "Accuracy": accuracy_score(d["true_label"], d["pred"]),
+            "Precision": precision_score(d["true_label"], d["pred"]),
+            "Recall": recall_score(d["true_label"], d["pred"]),
+            "F1-Score": f1_score(d["true_label"], d["pred"]),
+        })
+    if metrics:
+        st.subheader("Perbandingan Metrik Evaluasi (dibanding rating bintang)")
+        st.dataframe(pd.DataFrame(metrics), use_container_width=True)
     else:
-        st.info("Masukkan link/package, lalu klik **Prediksi**.")
+        st.info("Tidak ada metrik yang bisa dihitung.")
+elif page == "prediksi" and not st.session_state.results:
+    st.info("Masukkan link/package, lalu klik **Prediksi**.")
