@@ -123,24 +123,19 @@ st.markdown(
 
 st.markdown("""
 <style>
-/* --- MOBILE FIX: tampilkan hamburger, atur tumpang tindih --- */
 @media (max-width: 900px) {
-  /* Pastikan header Streamlit (yang memuat hamburger) terlihat
-     dan diletakkan DI BAWAH navbar kustom */
   [data-testid="stHeader"]{
     display: flex !important;
     position: fixed;
-    top: 90px;           /* letakkan tepat di bawah navbar tinggi 80–90px */
+    top: 90px;           
     left: 0; right: 0;
     background: transparent;
-    z-index: 1000000;    /* di atas navbar */
+    z-index: 1000000;    
   }
 
-  /* Navbar tetap di paling atas */
   .navbar{ top: 0; z-index: 999999; }
 
-  /* Turunkan konten & sidebar sesuai tinggi gabungan navbar + header */
-  [data-testid="stAppViewContainer"] > .main{ margin-top: 140px; } /* 90 + ~50 */
+  [data-testid="stAppViewContainer"] > .main{ margin-top: 140px; } 
   [data-testid="stSidebar"]{ top: 140px; }
 }
 </style>
@@ -148,10 +143,8 @@ st.markdown("""
 
 st.markdown("""
 <style>
-/* Sesuaikan dengan tinggi navbar kamu */
-:root{ --nav-h: 90px; }   /* navbar 80–90px? ganti di sini */
+:root{ --nav-h: 90px; }   
 
-/* Header/hamburger tetap di bawah navbar */
 @media (max-width: 900px){
   [data-testid="stHeader"]{
     display:flex !important;
@@ -160,19 +153,16 @@ st.markdown("""
     left:0; right:0;
     background:transparent;
     z-index:1000000;
-    height:48px;          /* tinggi approx header */
+    height:48px;          
   }
 
-  /* NAIKKAN posisi SIDEBAR: sejajar dengan bawah navbar */
   [data-testid="stSidebar"]{
     top:var(--nav-h) !important;
     height:calc(100vh - var(--nav-h)) !important;
   }
 
-  /* Kurangi padding atas di dalam sidebar (biar tidak terlihat turun) */
   [data-testid="stSidebar"] .block-container{ padding-top:.5rem !important; }
 
-  /* Konten turun sesuai total nav + header */
   [data-testid="stAppViewContainer"] > .main{
     margin-top:calc(var(--nav-h) + 48px) !important;
   }
@@ -183,59 +173,109 @@ st.markdown("""
 
 # HALAMAN BERANDA
 if page == "home":
-    st.markdown("## Selamat datang di **UlasAnalisa**")
+    st.markdown(
+        "<h2 style='text-align:center'>Selamat datang di <b>UlasAnalisa</b></h2>",
+        unsafe_allow_html=True,
+    )
+
     st.markdown("### Apa itu **UlasAnalisa?**")
     st.markdown(
         """
-        **UlasAnalisa** adalah website yang membantu menganalisis sentimen ulasan aplikasi di Google Play Store secara otomatis
-        dan menyajikannya dalam bentuk tabel yang mudah dipahami.  
-        Hasil sentimen bisa diunduh dalam bentuk **.csv**.
+        **UlasAnalisa** adalah website untuk menganalisis sentimen ulasan aplikasi di Google Play Store secara otomatis
+        dan menyajikannya dalam tabel yang mudah dipahami.  
+        Hasil sentimen juga dapat diunduh dalam format **.csv**.
         """
     )
 
+    st.divider()
     st.markdown("### Bagaimana Cara Memakainya?")
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.image("static/1.png", caption="Tampilan Google Play di Website", use_container_width=True)
-    with col2:
+
+    st.markdown("#### Jika membukanya menggunakan **desktop**")
+
+    # Step 1 (website)
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.image("static/1.png", caption="Tampilan Google Play (Website)", use_container_width=True)
+    with c2:
         st.markdown("### Step 1 (Website)")
-        st.write("Copy link aplikasi dari halaman Google Play Store yang ingin dianalisa (website).")
+        st.write("Copy tautan aplikasi dari halaman Google Play Store yang ingin dianalisis.")
 
-    st.markdown("---")
+    st.divider()
 
-    st.markdown("### Step 1 (Handphone)")
-    sp1, c1, c2, c3, sp2 = st.columns([1, 2, 2, 2, 1])
-    with c1: st.image("static/2.png", width=230)
-    with c2: st.image("static/3.png", width=230)
-    with c3: st.image("static/4.png", width=230)
-    st.write("Buka Google Play Store di HP → cari aplikasinya → ketuk **⋮ → Share** → pilih **Copy URL**.")
-
-    st.markdown("---")
-
-    #STEP 2
-    col1, col2 = st.columns([1, 1])
-    with col1: st.image("static/5.png", use_container_width=True)
-    with col2:
+    # Step 2 
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.image("static/5.png", use_container_width=True)
+    with c2:
         st.markdown("### Step 2")
-        st.write("Tempel link ke halaman **Prediksi**.")
+        st.write("Buka halaman **Prediksi** di UlasAnalisa, lalu **paste** tautan aplikasi pada kolom yang disediakan.")
 
-    st.markdown("---")
+    st.divider()
 
-    #STEP 3
-    col1, col2 = st.columns([1, 1])
-    with col1: st.image("static/6.png", use_container_width=True)
-    with col2:
+    # Step 3
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.image("static/6.png", use_container_width=True)
+    with c2:
         st.markdown("### Step 3")
-        st.write("Atur model, bahasa, negara, jumlah ulasan, dan urutan.")
+        st.write("Atur **model**, **bahasa**, **negara**, **jumlah ulasan**, dan **urutan** sesuai kebutuhan.")
 
-    st.markdown("---")
+    st.divider()
 
-    #STEP 4
-    col1, col2 = st.columns([1, 1])
-    with col1: st.image("static/7.png", use_container_width=True)
-    with col2:
+    # Step 4 
+    c1, c2 = st.columns([1, 1])
+    with c1:
+        st.image("static/7.png", use_container_width=True)
+    with c2:
         st.markdown("### Step 4")
-        st.write("Klik **Prediksi** → hasil dan tombol download muncul.")
+        st.write("Klik **Prediksi** untuk mulai menganalisis. Hasil dan tombol **Download .csv** akan muncul.")
+
+    st.divider()
+
+    st.markdown("#### Jika membukanya menggunakan **mobile**")
+
+    # Step 1 (mobile)
+    g1, g2, g3 = st.columns([1, 1, 1])
+    with g1: st.image("static/2.png", use_container_width=True)
+    with g2: st.image("static/3.png", use_container_width=True)
+    with g3: st.image("static/4.png", use_container_width=True)
+    st.markdown("**Step 1 (Mobile)** – Buka Google Play Store, pilih aplikasinya, ketuk **⋮ → Share → Copy URL**.")
+
+    st.divider()
+
+    # Step 2 
+    m1, m2 = st.columns([1, 1])
+    with m1: st.image("static/8.png", use_container_width=True)
+    with m2:
+        st.markdown("### Step 2 (Mobile)")
+        st.write("Masuk ke website **UlasAnalisa** → buka halaman **Prediksi** → **paste** tautan aplikasi.")
+
+    st.divider()
+
+    # Step 3 (
+    m1, m2 = st.columns([1, 1])
+    with m1: st.image("static/9.png", use_container_width=True)
+    with m2:
+        st.markdown("### Step 3 (Mobile)")
+        st.write("Ketuk tombol **Prediksi** untuk mulai.")
+
+    st.divider()
+
+    # Step 4 
+    m1, m2 = st.columns([1, 1])
+    with m1: st.image("static/10.png", use_container_width=True)
+    with m2:
+        st.markdown("### Step 4 (Mobile)")
+        st.write("Sesuaikan **Pengaturan** (model/bahasa/negara/jumlah ulasan/urutan) sesuai kebutuhan.")
+
+    st.divider()
+
+    # Step 5 
+    m1, m2 = st.columns([1, 1])
+    with m1: st.image("static/11.png", use_container_width=True)
+    with m2:
+        st.markdown("### Step 5 (Mobile)")
+        st.write("Gunakan tombol/ikon di layar (sesuai tampilan) untuk membuka panel **Pengaturan** bila diperlukan.")
 
 # HALAMAN TENTANG
 elif page == "tentang":
