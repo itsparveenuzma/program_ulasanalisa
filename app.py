@@ -225,43 +225,45 @@ if page == "home":
         st.write("Klik **Prediksi** untuk mulai menganalisis. Hasil dan tombol **Download .csv** akan muncul.")
 
     st.divider()
-
+    
     st.markdown("#### Jika membukanya menggunakan **mobile**")
 
-    # Step 1 (mobile)
-    g1, g2, g3 = st.columns([1, 1, 1])
-    with g1: st.image("static/2.png", use_container_width=True)
-    with g2: st.image("static/3.png", use_container_width=True)
-    with g3: st.image("static/4.png", use_container_width=True)
+    MOBILE_W = 180 
+
+    # Step 1 (mobile) 
+    g1, g2, g3 = st.columns(3)
+    with g1: st.image("static/2.png",  width=MOBILE_W)
+    with g2: st.image("static/3.png",  width=MOBILE_W)
+    with g3: st.image("static/4.png",  width=MOBILE_W)
     st.markdown("**Step 1 (Mobile)** – Buka Google Play Store, pilih aplikasinya, ketuk **⋮ → Share → Copy URL**.")
 
     # Step 2 
     m1, m2 = st.columns([1, 1])
-    with m1: st.image("static/8.png", use_container_width=True)
+    with m1: st.image("static/8.png",  width=MOBILE_W)
     with m2:
         st.markdown("### Step 2 (Mobile)")
         st.write("Masuk ke website **UlasAnalisa** → buka halaman **Prediksi** → **paste** tautan aplikasi.")
 
-    # Step 3 (
+    # Step 3 
     m1, m2 = st.columns([1, 1])
-    with m1: st.image("static/9.png", use_container_width=True)
+    with m1: st.image("static/9.png",  width=MOBILE_W)
     with m2:
         st.markdown("### Step 3 (Mobile)")
         st.write("Ketuk tombol **Prediksi** untuk mulai.")
 
-    # Step 4 
+    # Step 4
     m1, m2 = st.columns([1, 1])
-    with m1: st.image("static/10.png", use_container_width=True)
+    with m1: st.image("static/10.png", width=MOBILE_W)
     with m2:
         st.markdown("### Step 4 (Mobile)")
-        st.write("Sesuaikan **Pengaturan** (model/bahasa/negara/jumlah ulasan/urutan) sesuai kebutuhan.")
+        st.write("Sesuaikan **Pengaturan** (model/bahasa/negara/jumlah ulasan/urutan).")
 
     # Step 5 
     m1, m2 = st.columns([1, 1])
-    with m1: st.image("static/11.png", use_container_width=True)
+    with m1: st.image("static/11.png", width=MOBILE_W)
     with m2:
         st.markdown("### Step 5 (Mobile)")
-        st.write("Gunakan tombol/ikon di layar (sesuai tampilan) untuk membuka panel **Pengaturan** bila diperlukan.")
+        st.write("Gunakan ikon/tombol untuk membuka panel **Pengaturan** bila diperlukan.")
 
 # HALAMAN TENTANG
 elif page == "tentang":
