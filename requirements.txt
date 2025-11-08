@@ -5,3 +5,8 @@ scikit-learn
 joblib
 google-play-scraper
 xlsxwriter
+wordcloud
+nltk
+matplotlib
+seaborn
+plotly
