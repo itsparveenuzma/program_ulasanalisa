@@ -181,8 +181,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-NLTK_DIR = "/home/appuser/nltk_data"  # lokasi yang bisa ditulis di Streamlit Cloud
-os.makedirs(NLTK_DIR, exist_ok=True)
+NLTK_DIR = "/home/appuser/nltk_data" 
 if NLTK_DIR not in nltk.data.path:
     nltk.data.path.append(NLTK_DIR)
 
@@ -191,23 +190,20 @@ def ensure_stopwords():
     """Pastikan korpus 'stopwords' tersedia; unduh bila belum ada.
        Return: set stopwords gabungan id + en dengan fallback lokal jika unduhan gagal."""
     try:
-        # cek cepat: bisa load? kalau gagal akan masuk except dan kita unduh
         from nltk.corpus import stopwords as _sw
         _ = _sw.words('english')
     except LookupError:
         try:
             nltk.download('stopwords', download_dir=NLTK_DIR, quiet=True)
         except Exception:
-            pass  # tetap lanjut ke fallback
+            pass  
 
-    # coba load lagi; kalau tetap gagal, pakai fallback
     try:
         from nltk.corpus import stopwords as _sw
         id_sw = set(_sw.words('indonesian'))
         en_sw = set(_sw.words('english'))
         return id_sw | en_sw
     except Exception:
-        # Fallback minimal bila downloader gagal (misal tanpa internet)
         id_fallback = {
             'yang','dan','di','ke','dari','pada','untuk','dengan','atau','tidak','ini',
             'itu','saya','kami','kamu','dia','mereka','akan','juga','karena','sebagai',
