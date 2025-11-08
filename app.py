@@ -8,6 +8,7 @@ import streamlit as st
 import joblib
 import plotly.express as px
 import altair as alt
+import nltk
 
 from google_play_scraper import app as gp_app, reviews, Sort
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
@@ -178,6 +179,27 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+#nltk
+@st.cache_resource(show_spinner=False)
+def ensure_nltk():
+    # Lokasi cache korpus di home (persisten di Streamlit Cloud)
+    nltk_dir = Path.home() / ".nltk_data"
+    nltk.data.path.append(str(nltk_dir))
+
+    try:
+        from nltk.corpus import stopwords
+        _ = stopwords.words('indonesian')
+    except LookupError:
+        nltk.download('stopwords', download_dir=str(nltk_dir))
+        # (opsional bila kamu pakai tokenizer/lemmatizer)
+        # nltk.download('punkt', download_dir=str(nltk_dir))
+        # nltk.download('wordnet', download_dir=str(nltk_dir))
+
+    return True
+
+# panggil sedini mungkin
+ensure_nltk()
 
 
 # HALAMAN BERANDA
