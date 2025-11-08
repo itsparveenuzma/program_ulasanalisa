@@ -19,39 +19,6 @@ from collections import Counter
 from nltk.corpus import stopwords
 from sklearn.metrics import confusion_matrix
 
-#BOOSTRAP NLTK
-@st.cache_resource(show_spinner=False)
-def ensure_nltk():
-    """
-    Pastikan korpus NLTK tersedia di environment deploy:
-    - Download ke folder yang bisa ditulis (home dir)
-    - Tambahkan ke nltk.data.path dan env NLTK_DATA
-    - Unduh paket yang sering dibutuhkan
-    """
-    nltk_dir = Path.home() / "nltk_data"
-    os.makedirs(nltk_dir, exist_ok=True)
-    if str(nltk_dir) not in nltk.data.path:
-        nltk.data.path.append(str(nltk_dir))
-    os.environ["NLTK_DATA"] = str(nltk_dir)
-
-    needed = [
-        ("corpora/stopwords", "stopwords"),
-        ("tokenizers/punkt", "punkt"),
-        ("tokenizers/punkt_tab", "punkt_tab"),
-        ("corpora/wordnet", "wordnet"),
-        ("corpora/omw-1.4", "omw-1.4"),
-    ]
-    for res_path, pkg in needed:
-        try:
-            nltk.data.find(res_path)
-        except LookupError:
-            nltk.download(pkg, download_dir=str(nltk_dir), quiet=True)
-
-    return True
-
-ensure_nltk()
-
-
 # PAGE CONFIG
 st.set_page_config(
     page_title="UlasAnalisa – Prediksi Sentimen",
@@ -212,6 +179,42 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+@st.cache_resource(show_spinner=False)
+def ensure_nltk():
+    """
+    Pastikan korpus NLTK tersedia di environment deploy:
+    - Download ke folder yang bisa ditulis (home dir)
+    - Tambahkan ke nltk.data.path dan env NLTK_DATA
+    - Unduh paket yang sering dibutuhkan
+    """
+    nltk_dir = Path.home() / "nltk_data"
+    os.makedirs(nltk_dir, exist_ok=True)
+    if str(nltk_dir) not in nltk.data.path:
+        nltk.data.path.append(str(nltk_dir))
+    # bantu juga lewat env var (beberapa host memerlukannya)
+    os.environ["NLTK_DATA"] = str(nltk_dir)
+
+    needed = [
+        ("corpora/stopwords", "stopwords"),
+        ("tokenizers/punkt", "punkt"),
+        # NLTK baru memecah tabel tokenizer
+        ("tokenizers/punkt_tab", "punkt_tab"),
+        ("corpora/wordnet", "wordnet"),
+        ("corpora/omw-1.4", "omw-1.4"),
+    ]
+    for res_path, pkg in needed:
+        try:
+            nltk.data.find(res_path)
+        except LookupError:
+            nltk.download(pkg, download_dir=str(nltk_dir), quiet=True)
+
+    return True
+
+# panggil sedini mungkin (sebelum ada stopwords.words(...))
+ensure_nltk()
+# ================================================================
+
 
 # HALAMAN BERANDA
 if page == "home":
