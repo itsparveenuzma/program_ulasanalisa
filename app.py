@@ -73,29 +73,83 @@ tentang_active = "active" if page == "tentang" else ""
 st.markdown(
     f"""
 <style>
-.navbar {{
-  position: fixed; top: 0; left: 0; right: 0; height: 80px;
-  background: #ffffff; display: flex; align-items: center;
-  padding: 0 1.5rem; border-bottom: 3px solid #b71c1c; z-index: 999999;
+:root {{
+  --nav-height: 80px;
 }}
-/* turunkan konten & sidebar */
-[data-testid="stAppViewContainer"] > .main {{ margin-top: 90px; }}
-[data-testid="stSidebar"] {{ top: 90px; }}
+
+/* bar putih di atas */
+.navbar {{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-bottom: 3px solid #b71c1c;
+  z-index: 1000;
+}}
+
+/* geser isi halaman & sidebar ke bawah navbar */
+[data-testid="stAppViewContainer"] > .main {{
+  margin-top: calc(var(--nav-height) + 10px);
+}}
+
+[data-testid="stSidebar"] {{
+  top: var(--nav-height);
+  height: calc(100vh - var(--nav-height));
+}}
+
+/* tombol buka/tutup sidebar selalu muncul di BAWAH navbar */
+[data-testid="collapsedControl"] {{
+  position: fixed;
+  left: 1rem;
+  top: calc(var(--nav-height) + 10px);
+  z-index: 1100;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}}
 
 /* kiri & kanan sama lebar dan di-center */
 .nav-left, .nav-right {{
-  width: 220px; display: flex; justify-content: center; align-items: center;
+  width: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }}
 
 /* menu tepat di tengah */
-.nav-center {{ flex: 1; display: flex; justify-content: center; gap: 2.5rem; }}
-.nav-center a {{ text-decoration: none; color: #444; font-weight: 500; }}
-.nav-center a.active {{
-  color: #b71c1c; border-bottom: 2px solid #b71c1c; padding-bottom: 4px;
+.nav-center {{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
 }}
 
-.logo-left {{ height: 150px; }}
-.logo-right {{ height: 65px; }}
+.nav-center a {{
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+}}
+
+.nav-center a.active {{
+  color: #b71c1c;
+  border-bottom: 2px solid #b71c1c;
+  padding-bottom: 4px;
+}}
+
+.logo-left  {{ height: 45px; }}
+.logo-right {{ height: 45px; }}
+
+/* versi mobile: navbar sedikit lebih tinggi */
+@media (max-width: 900px) {{
+  :root {{
+    --nav-height: 90px;
+  }}
+}}
 </style>
 
 <div class="navbar">
@@ -115,63 +169,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    """
-<style>
-@media (max-width: 900px) {
-  [data-testid="stHeader"]{
-    display: flex !important; position: fixed; top: 90px; left: 0; right: 0;
-    background: transparent; z-index: 1000000;
-  }
-  .navbar{ top: 0; z-index: 999999; }
-  [data-testid="stAppViewContainer"] > .main{ margin-top: 140px; }
-  [data-testid="stSidebar"]{ top: 140px; }
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
 
-st.markdown(
-    """
-<style>
-:root{ --nav-h: 90px; }
-@media (max-width: 900px){
-  [data-testid="stHeader"]{
-    display:flex !important; position:fixed; top:var(--nav-h); left:0; right:0;
-    background:transparent; z-index:1000000; height:48px;
-  }
-  [data-testid="stSidebar"]{
-    top:var(--nav-h) !important;
-    height:calc(100vh - var(--nav-h)) !important;
-  }
-  [data-testid="stSidebar"] .block-container{ padding-top:.5rem !important; }
-  [data-testid="stAppViewContainer"] > .main{
-    margin-top:calc(var(--nav-h) + 48px) !important;
-  }
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-st.markdown(
-    """
-    <style>
-    /* Pastikan tombol toggle sidebar (hamburger/arrow) selalu terlihat */
-    [data-testid="collapsedControl"] {
-        position: fixed;
-        left: 1rem;
-        top: 20px;              /* kira-kira di tengah tinggi navbar (80–90px) */
-        z-index: 1000002;       /* lebih tinggi dari .navbar (999999) */
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # NLTK PREP (persisten)
 @st.cache_resource(show_spinner=False)
