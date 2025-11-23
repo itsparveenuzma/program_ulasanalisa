@@ -155,23 +155,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown(
-    """
-    <style>
-    /* Pastikan tombol toggle sidebar (hamburger/arrow) selalu terlihat */
-    [data-testid="collapsedControl"] {
-        position: fixed;
-        left: 1rem;
-        top: 20px;              /* kira-kira di tengah tinggi navbar (80–90px) */
-        z-index: 1000002;       /* lebih tinggi dari .navbar (999999) */
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # NLTK PREP (persisten)
 @st.cache_resource(show_spinner=False)
