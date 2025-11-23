@@ -73,14 +73,34 @@ tentang_active = "active" if page == "tentang" else ""
 st.markdown(
     f"""
 <style>
-.navbar {{
-  position: fixed; top: 0; left: 0; right: 0; height: 80px;
-  background: #ffffff; display: flex; align-items: center;
-  padding: 0 1.5rem; border-bottom: 3px solid #b71c1c; z-index: 999999;
+/* tinggi header default kira-kira 3.5rem */
+:root {{
+  --st-header-h: 3.5rem;
+  --nav-h: 80px;
 }}
-/* turunkan konten & sidebar */
-[data-testid="stAppViewContainer"] > .main {{ margin-top: 90px; }}
-[data-testid="stSidebar"] {{ top: 90px; }}
+
+/* NAVBAR DIPASANG DI BAWAH HEADER STREAMLIT */
+.navbar {{
+  position: fixed;
+  top: var(--st-header-h);   /* bukan 0 lagi */
+  left: 0;
+  right: 0;
+  height: var(--nav-h);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-bottom: 3px solid #b71c1c;
+  z-index: 900;              /* lebih kecil dari header bawaan */
+}}
+
+/* turunkan konten & sidebar: header + navbar */
+[data-testid="stAppViewContainer"] > .main {{
+  margin-top: calc(var(--st-header-h) + var(--nav-h));
+}}
+section[data-testid="stSidebar"] {{
+  top: calc(var(--st-header-h) + 0px);
+}}
 
 /* kiri & kanan sama lebar dan di-center */
 .nav-left, .nav-right {{
@@ -96,6 +116,12 @@ st.markdown(
 
 .logo-left {{ height: 150px; }}
 .logo-right {{ height: 65px; }}
+
+/* pastikan tombol hamburger tidak disembunyikan style lain */
+[data-testid="collapsedControl"] {{
+  visibility: visible !important;
+  opacity: 1 !important;
+}}
 </style>
 
 <div class="navbar">
