@@ -120,7 +120,7 @@ st.markdown(
 /* geser tombol hamburger ke tengah navbar */
 [data-testid="collapsedControl"] {{
   position: fixed;
-  top: 90px !important;   /* naik-turun di sini kalau mau */
+  top: 200px !important;   /* naik-turun di sini kalau mau */
   left: 18px !important;
   z-index: 1000002 !important;   /* di atas navbar */
   display: flex !important;
