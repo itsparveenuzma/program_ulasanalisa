@@ -7,5 +7,5 @@ google-play-scraper
 xlsxwriter
 numpy
 wordcloud
-mathplotlib
+matplotlib
 nltk
