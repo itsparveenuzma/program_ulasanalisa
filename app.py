@@ -117,41 +117,58 @@ st.markdown(
 
 st.markdown(
     """
-<style>
-@media (max-width: 900px) {
-  [data-testid="stHeader"]{
-    display: flex !important; position: fixed; top: 90px; left: 0; right: 0;
-    background: transparent; z-index: 1000000;
-  }
-  .navbar{ top: 0; z-index: 999999; }
-  [data-testid="stAppViewContainer"] > .main{ margin-top: 140px; }
-  [data-testid="stSidebar"]{ top: 140px; }
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
+    <style>
+    /* Tinggi navbar custom */
+    :root {
+        --nav-h: 90px;
+    }
 
-st.markdown(
-    """
-<style>
-:root{ --nav-h: 90px; }
-@media (max-width: 900px){
-  [data-testid="stHeader"]{
-    display:flex !important; position:fixed; top:var(--nav-h); left:0; right:0;
-    background:transparent; z-index:1000000; height:48px;
-  }
-  [data-testid="stSidebar"]{
-    top:var(--nav-h) !important;
-    height:calc(100vh - var(--nav-h)) !important;
-  }
-  [data-testid="stSidebar"] .block-container{ padding-top:.5rem !important; }
-  [data-testid="stAppViewContainer"] > .main{
-    margin-top:calc(var(--nav-h) + 48px) !important;
-  }
-}
-</style>
-""",
+    /* Navbar tetap di paling atas */
+    .navbar {
+        top: 0;
+        z-index: 999999;
+    }
+
+    /* Header bawaan Streamlit dibuat transparan dan tingginya 0,
+       tapi tetap ada supaya tombol sidebar masih hidup */
+    [data-testid="stHeader"] {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 0;
+        background: transparent;
+        z-index: 1000000;
+    }
+    [data-testid="stHeader"] > * {
+        height: 0;
+        overflow: visible;
+    }
+
+    /* Pindahkan tombol toggle sidebar (hamburger/arrow) ke atas navbar,
+       dan pastikan selalu kelihatan */
+    [data-testid="collapsedControl"] {
+        position: fixed;
+        left: 16px;
+        top: 24px;  /* sesuaikan kalau kurang pas dengan tinggi navbar */
+        z-index: 1000001;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Konten utama turun sedikit di bawah navbar */
+    [data-testid="stAppViewContainer"] > .main {
+        margin-top: var(--nav-h);
+    }
+
+    /* Sidebar mulai di bawah navbar dan tingginya sisa layar */
+    [data-testid="stSidebar"] {
+        top: var(--nav-h);
+        height: calc(100vh - var(--nav-h));
+    }
+    </style>
+    """,
     unsafe_allow_html=True,
 )
 
