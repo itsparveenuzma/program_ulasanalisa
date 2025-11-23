@@ -397,7 +397,7 @@ elif page == "prediksi":
 
     # ARTIFACT PATH
     VEC_PATH = Path("Artifacts") / "tfidf_vectorizer.joblib"
-    SVM_PATH = Path("Artifacts") / "svm_linea_model.joblib"
+    SVM_PATH = Path("Artifacts") / "svm_linear_model.joblib"
     RF_PATH = Path("Artifacts") / "random_forest_model.joblib"
 
     @st.cache_resource
