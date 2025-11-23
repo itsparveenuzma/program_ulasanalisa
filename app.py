@@ -116,6 +116,24 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown(
+    """
+<style>
+/* DESKTOP: paksa sidebar selalu kelihatan (abaikan state collapse) */
+@media (min-width: 900px){
+  section[data-testid="stSidebar"] {
+    transform: translateX(0px) !important;  /* kalau tadinya -100%, kita nol-kan */
+  }
+  div[data-testid="collapsedControl"]{
+    display: none !important;  /* tombol kecil di pojok yg biasanya buat show/hide */
+  }
+}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
 # NLTK PREP (persisten)
 @st.cache_resource(show_spinner=False)
 def ensure_nltk():
