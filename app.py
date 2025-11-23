@@ -332,7 +332,7 @@ elif page == "tentang":
 <style>
 .about-title-wrap{
   width:100%; display:flex; justify-content:center; align-items:center;
-  margin: 20px 0 22px;
+  margin: 60px 0 22px;
 }
 .about-title-wrap span{
   font-weight:800; font-size: clamp(26px, 3.0vw, 40px);
