@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import joblib
-import plotly.express as px  # (dipakai untuk ekspansi ke depan)
+import plotly.express as px 
 import altair as alt
 import nltk
 
@@ -19,11 +19,7 @@ from nltk.corpus import stopwords
 from sklearn.metrics import confusion_matrix
 import plotly.express as px
 
-
-
-# ===============================
 # PAGE CONFIG
-# ===============================
 st.set_page_config(
     page_title="UlasAnalisa – Prediksi Sentimen",
     page_icon="static/logo_ulas.png",
@@ -31,10 +27,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-
-# ===============================
 # SESSION STATE BOOTSTRAP
-# ===============================
 for k, v in {
     "results": {},
     "app_id": None,
@@ -45,10 +38,7 @@ for k, v in {
     if k not in st.session_state:
         st.session_state[k] = v
 
-
-# ===============================
 # RESPONSIVE FIX HORIZONTAL WRAP
-# ===============================
 st.markdown(
     """
 <style>
@@ -60,10 +50,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
-# ===============================
 # LOGO base64
-# ===============================
 def img_to_base64(path: str) -> str:
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
@@ -72,10 +59,7 @@ def img_to_base64(path: str) -> str:
 logo_left_b64 = img_to_base64("static/logo_ulas.png")
 logo_right_b64 = img_to_base64("static/fti_untar.png")
 
-
-# ===============================
 # BACA PAGE DARI URL
-# ===============================
 try:
     page = st.query_params.get("page", "home")
 except AttributeError:
@@ -85,10 +69,7 @@ home_active = "active" if page == "home" else ""
 pred_active = "active" if page == "prediksi" else ""
 tentang_active = "active" if page == "tentang" else ""
 
-
-# ===============================
 # NAVBAR
-# ===============================
 st.markdown(
     f"""
 <style>
@@ -174,10 +155,25 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+st.markdown(
+    """
+    <style>
+    /* Pastikan tombol toggle sidebar (hamburger/arrow) selalu terlihat */
+    [data-testid="collapsedControl"] {
+        position: fixed;
+        left: 1rem;
+        top: 20px;              /* kira-kira di tengah tinggi navbar (80–90px) */
+        z-index: 1000002;       /* lebih tinggi dari .navbar (999999) */
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# ===============================
 # NLTK PREP (persisten)
-# ===============================
 @st.cache_resource(show_spinner=False)
 def ensure_nltk():
     nltk_dir = Path.home() / ".nltk_data"
@@ -193,10 +189,7 @@ def ensure_nltk():
 
 ensure_nltk()
 
-
-# ===============================
 # HALAMAN BERANDA
-# ===============================
 if page == "home":
     st.markdown(
         "<h2 style='text-align:center'>Selamat datang di <b>UlasAnalisa</b></h2>",
@@ -287,13 +280,10 @@ if page == "home":
     st.write("Gunakan ikon/tombol untuk membuka panel **Pengaturan** bila diperlukan.")
     center_image("static/11.png")
 
-
-# ===============================
 # HALAMAN TENTANG
-# ===============================
 elif page == "tentang":
-    IMG_W = 220  # ukuran foto kiri/kanan (samakan)
-    LOGO_W = 300  # ukuran logo UNTAR
+    IMG_W = 220  
+    LOGO_W = 300 
 
     st.markdown(
         """
@@ -329,8 +319,6 @@ elif page == "tentang":
 
     # Judul
     st.markdown("<div class='about-title-wrap'><span>Pengembang Website</span></div>", unsafe_allow_html=True)
-
-    # baris foto bersebelahan & tetap di tengah
     spacerL, left, right, spacerR = st.columns([1.60, 3, 3, 0.65], gap="small")
 
     # FOTO KIRI
@@ -361,9 +349,9 @@ elif page == "tentang":
         )
         st.markdown("</div>", unsafe_allow_html=True)
 
-    st.write("")  # spasi kecil
+    st.write("") 
 
-    # logo UNTAR di tengah
+    # logo UNTAR
     a, b, c = st.columns([1.3, 1, 0.7])
     with b:
         st.markdown(f"<div style='width:{LOGO_W}px; margin:0 auto;'>", unsafe_allow_html=True)
@@ -371,10 +359,7 @@ elif page == "tentang":
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
-
-# ===============================
 # HALAMAN PREDIKSI
-# ===============================
 elif page == "prediksi":
     st.title("Prediksi Sentimen dari Link Google Play")
     st.caption("Masukkan link aplikasi dari Google Play Store, lalu sistem akan prediksi sentimennya")
@@ -569,9 +554,7 @@ elif page == "prediksi":
         n = st.session_state.get("scrape_n", 0)
         return min(len(df), n + 500)
 
-    # ===============================
     # OUTPUT / HASIL
-    # ===============================
     if st.session_state.results and page == "prediksi":
         all_fig_images = []
 
@@ -920,12 +903,9 @@ Model terbaik menurut **F1-Score** adalah **{best['Model']}** dengan **F1 ≈ {b
         else:
             st.info("Tidak ada metrik yang bisa dihitung.")
 
-        # ===============================
-        # TOMBOL DOWNLOAD (gabungan tabel & gambar)
-        # ===============================
+        # TOMBOL DOWNLOAD 
         out = io.BytesIO()
         with pd.ExcelWriter(out, engine="xlsxwriter") as w:
-            # sheet per model (dibatasi agar ringan)
             for i, (name, dfm) in enumerate(st.session_state.results.items(), start=1):
                 sheet_name = name if len(name) <= 31 else f"Model{i}"
                 dfm.head(table_limit(dfm)).to_excel(w, sheet_name=sheet_name, index=False)
