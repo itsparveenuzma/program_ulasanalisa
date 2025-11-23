@@ -754,7 +754,7 @@ elif page == "prediksi":
 
                     # hitung frekuensi dan ambil 10 teratas
                     counter = Counter(tokens)
-                    top10 = counter.most_common(10)
+                    top10 = counter.most_common(20)
                     df_top = pd.DataFrame(top10, columns=["word", "count"])
 
                     # tambah info model & sentimen + ranking
