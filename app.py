@@ -117,17 +117,19 @@ st.markdown(
   box-shadow: none;
 }}
 
-/* geser tombol hamburger ke tengah navbar */
-[data-testid="collapsedControl"] {{
-  position: fixed;
-  top: 200px !important;   /* naik-turun di sini kalau mau */
-  left: 18px !important;
-  z-index: 1000002 !important;   /* di atas navbar */
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  transform: none !important;
-}}
+/* Geser tombol sidebar ke bawah navbar */
+[data-testid="collapsedControl"] {
+    position: fixed;
+    top: calc(var(--nav-h) + 10px) !important;  /* 10px di bawah navbar */
+    left: 18px !important;
+    z-index: 1000002 !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    transform: none !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
 
 /* buang tinggi/padding header supaya nggak bikin gap */
 [data-testid="stHeader"] > div:first-child {{
