@@ -20,7 +20,6 @@ from sklearn.metrics import confusion_matrix
 import plotly.express as px
 
 
-
 # ===============================
 # PAGE CONFIG
 # ===============================
@@ -543,17 +542,17 @@ elif page == "prediksi":
             st.session_state.app_id = app_id
             st.session_state.is_combo = (model_name == "SVM dan RandomForest")
 
-            # Simpan output CSV/Excel
+            # Simpan output CSV/Excel ringan (kalau mau dipakai di tempat lain)
             if st.session_state.is_combo:
                 df_svm = results["SVM (RBF)"]
                 df_rf = results["RandomForest"]
 
-                out = io.BytesIO()
-                with pd.ExcelWriter(out, engine="xlsxwriter") as w:
+                out_tmp = io.BytesIO()
+                with pd.ExcelWriter(out_tmp, engine="xlsxwriter") as w:
                     df_svm.to_excel(w, sheet_name="SVM (RBF)", index=False)
                     df_rf.to_excel(w, sheet_name="RandomForest", index=False)
-                out.seek(0)
-                st.session_state.csv_pred = out.getvalue()
+                out_tmp.seek(0)
+                st.session_state.csv_pred = out_tmp.getvalue()
 
                 dist_svm = (
                     df_svm["pred_label"].value_counts().rename_axis("sentiment").reset_index(name="count")
@@ -573,11 +572,11 @@ elif page == "prediksi":
                 st.session_state.csv_pred = dfk.to_csv(index=False).encode("utf-8")
                 st.session_state.csv_dist = (
                     dfk["pred_label"]
-                    .value_counts()
-                    .rename_axis("sentiment")
-                    .reset_index(name="count")
-                    .to_csv(index=False)
-                    .encode("utf-8")
+                        .value_counts()
+                        .rename_axis("sentiment")
+                        .reset_index(name="count")
+                        .to_csv(index=False)
+                        .encode("utf-8")
                 )
 
     # Helper batas baris tabel
@@ -590,6 +589,7 @@ elif page == "prediksi":
     # ===============================
     if st.session_state.results and page == "prediksi":
         all_fig_images = []
+        top_words_tables = []  # rekap Top 10 kata per sentimen (semua model)
 
         # Distribusi Hasil Sentimen
         items = list(st.session_state.results.items())
@@ -716,6 +716,71 @@ elif page == "prediksi":
         for name, dfm in st.session_state.results.items():
             st.subheader(f"Sampel Hasil Prediksi – {name}")
             st.dataframe(dfm.head(table_limit(dfm)), use_container_width=True)
+
+        # ===============================
+        # TOP 10 KATA PER SENTIMEN
+        # ===============================
+        st.subheader("Top 10 Kata per Sentimen")
+        st.caption(
+            "Grafik ini menampilkan 10 kata yang paling sering muncul pada masing-masing sentimen "
+            "berdasarkan hasil prediksi model."
+        )
+
+        for model_name, dfm in st.session_state.results.items():
+            st.markdown(f"### {model_name}")
+            c_pos, c_neg = st.columns(2)
+
+            for label, col in [("Positive", c_pos), ("Negative", c_neg)]:
+                sub = dfm.loc[dfm["pred_label"] == label, "text"].dropna()
+
+                with col:
+                    if sub.empty:
+                        st.write(f"Tidak ada data untuk sentimen **{label}**.")
+                        continue
+
+                    # gabung semua teks
+                    text = " ".join(sub.astype(str))
+
+                    # stopwords gabungan Indonesia + Inggris
+                    sw = set(stopwords.words("indonesian")) | set(stopwords.words("english"))
+
+                    # tokenisasi simpel (hanya huruf, dibikin lower)
+                    tokens = re.findall(r"[A-Za-zÀ-ÿ]+", text.lower())
+                    tokens = [t for t in tokens if t not in sw and len(t) >= 3]
+
+                    if not tokens:
+                        st.write(f"Tidak ada token yang bisa dihitung untuk sentimen **{label}**.")
+                        continue
+
+                    # hitung frekuensi dan ambil 10 teratas
+                    counter = Counter(tokens)
+                    top10 = counter.most_common(10)
+                    df_top = pd.DataFrame(top10, columns=["word", "count"])
+
+                    # tambah info model & sentimen + ranking
+                    df_top["Model"] = model_name
+                    df_top["Sentiment"] = label
+                    df_top["Rank"] = np.arange(1, len(df_top) + 1)
+                    df_top = df_top[["Model", "Sentiment", "Rank", "word", "count"]]
+
+                    # simpan untuk diekspor ke Excel
+                    top_words_tables.append(df_top)
+
+                    # grafik bar horizontal Top 10 kata
+                    chart = (
+                        alt.Chart(df_top)
+                        .mark_bar()
+                        .encode(
+                            x=alt.X("count:Q", title="Frekuensi"),
+                            y=alt.Y("word:N", sort="-x", title="Kata"),
+                            tooltip=[
+                                alt.Tooltip("word:N", title="Kata"),
+                                alt.Tooltip("count:Q", title="Jumlah"),
+                            ],
+                        )
+                    ).properties(height=260)
+
+                    st.altair_chart(chart, use_container_width=True)
 
         # WordCloud
         st.subheader("Visualisasi WordCloud")
@@ -892,44 +957,45 @@ elif page == "prediksi":
 
             if float(best["Precision"]) > float(best["Recall"]):
                 tradeoff = (
-                    "Model ini **lebih ketat** saat menyatakan *positif* "
-                    "(**Precision** lebih tinggi → **false positive** lebih sedikit), "
-                    "namun ada potensi **positif terlewat** lebih banyak dibanding model dengan Recall lebih tinggi."
+                    "Model ini lebih ketat saat menyatakan positif "
+                    "(Precision lebih tinggi → false positive lebih sedikit), "
+                    "namun ada potensi positif terlewat lebih banyak dibanding model dengan Recall lebih tinggi."
                 )
             elif float(best["Precision"]) < float(best["Recall"]):
                 tradeoff = (
-                    "Model ini **lebih menyeluruh** menangkap *positif* "
-                    "(**Recall** lebih tinggi → **false negative** lebih sedikit), "
-                    "namun bisa sedikit lebih banyak memberikan **alarm palsu** dibanding model dengan Precision lebih tinggi."
+                    "Model ini lebih menyeluruh menangkap positif "
+                    "(Recall lebih tinggi → false negative lebih sedikit), "
+                    "namun bisa sedikit lebih banyak memberikan alarm palsu dibanding model dengan Precision lebih tinggi."
                 )
             else:
-                tradeoff = "Model ini memiliki keseimbangan yang sangat baik antara **Precision** dan **Recall**."
+                tradeoff = "Model ini punya keseimbangan yang baik antara Precision dan Recall."
 
             tie_note = ""
             tied = ranked[ranked["F1-Score"].eq(best["F1-Score"])]
             if len(tied) > 1:
                 alternatives = ", ".join(tied["Model"].tolist()[1:])
                 tie_note = (
-                    f"\n\n> Catatan: Ada **seri F1-Score** antara **{best['Model']}** dan {alternatives}. "
-                    "Pemilihan dilakukan dengan *tie-breaker* **Accuracy** yang lebih tinggi."
+                    f"\n\nCatatan: Ada seri F1-Score antara {best['Model']} dan {alternatives}. "
+                    "Pemilihan dilakukan dengan tie-breaker Accuracy yang lebih tinggi."
                 )
 
             st.markdown(
                 f"""
-**Penjelasan**  
-Model terbaik menurut **F1-Score** adalah **{best['Model']}** dengan **F1 ≈ {best['F1-Score']:.3f}**, **Accuracy ≈ {best['Accuracy']:.3f}**, **Precision ≈ {best['Precision']:.3f}**, dan **Recall ≈ {best['Recall']:.3f}**. {tradeoff}
+Model dengan F1-Score terbaik saat ini adalah **{best['Model']}**  
+dengan F1 ≈ {best['F1-Score']:.3f}, Accuracy ≈ {best['Accuracy']:.3f}, Precision ≈ {best['Precision']:.3f}, dan Recall ≈ {best['Recall']:.3f}.  
+{tradeoff}
 """
                 + (
-                    f"Model peringkat berikutnya: **{second['Model']}** "
-                    f"(F1 ≈ {second['F1-Score']:.3f}, Accuracy ≈ {second['Accuracy']:.3f}).\n\n"
+                    f"\nModel berikutnya: **{second['Model']}** "
+                    f"(F1 ≈ {second['F1-Score']:.3f}, Accuracy ≈ {second['Accuracy']:.3f}).\n"
                     if second is not None
                     else ""
                 )
                 + f"""
-**Rekomendasi pemilihan model:**
-- Pilih **{best['Model']}** bila kamu ingin **keseimbangan** terbaik (F1 tinggi) — aman saat data tidak seimbang.
-- Jika *false positive* harus **sangat** rendah (hindari “positif palsu”), pertimbangkan model dengan **Precision** tertinggi.
-- Jika *false negative* harus **sangat** rendah (jangan sampai ada yang terlewat), pertimbangkan model dengan **Recall** tertinggi.
+Rekomendasi:
+- Pakai **{best['Model']}** bila butuh keseimbangan (F1 tinggi).
+- Pilih model dengan Precision tertinggi bila sangat ingin menekan false positive.
+- Pilih model dengan Recall tertinggi bila sangat ingin menekan false negative.
 """
                 + tie_note
             )
@@ -945,6 +1011,11 @@ Model terbaik menurut **F1-Score** adalah **{best['Model']}** dengan **F1 ≈ {b
             for i, (name, dfm) in enumerate(st.session_state.results.items(), start=1):
                 sheet_name = name if len(name) <= 31 else f"Model{i}"
                 dfm.head(table_limit(dfm)).to_excel(w, sheet_name=sheet_name, index=False)
+
+            # sheet rekap Top 10 kata per sentimen
+            if top_words_tables:
+                df_top_all = pd.concat(top_words_tables, ignore_index=True)
+                df_top_all.to_excel(w, sheet_name="Top10_Words", index=False)
 
             # sheet grafik
             ws_name = "Grafik"
@@ -976,4 +1047,4 @@ Model terbaik menurut **F1-Score** adalah **{best['Model']}** dengan **F1 ≈ {b
         )
 
     elif page == "prediksi" and not st.session_state.results:
-        st.info("Masukkan link/package, lalu klik **Prediksi**.")
+        st.info("Masukkan link/package, lalu klik Prediksi.")
