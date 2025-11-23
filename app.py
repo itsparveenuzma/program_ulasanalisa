@@ -92,29 +92,85 @@ tentang_active = "active" if page == "tentang" else ""
 st.markdown(
     f"""
 <style>
-.navbar {{
-  position: fixed; top: 0; left: 0; right: 0; height: 80px;
-  background: #ffffff; display: flex; align-items: center;
-  padding: 0 1.5rem; border-bottom: 3px solid #b71c1c; z-index: 999999;
+:root {{
+  --nav-h: 90px;      /* tinggi navbar */
+  --header-h: 48px;   /* tinggi header bawaan Streamlit */
 }}
-/* turunkan konten & sidebar */
-[data-testid="stAppViewContainer"] > .main {{ margin-top: 90px; }}
-[data-testid="stSidebar"] {{ top: 90px; }}
+
+/* NAVBAR FIXED DI ATAS */
+.navbar {{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  border-bottom: 3px solid #b71c1c;
+  z-index: 9999;
+}}
+
+/* HEADER STREAMLIT (YANG ADA TOMBOL SIDEBAR) DIPINDAH DI BAWAH NAVBAR */
+[data-testid="stHeader"]{{
+  display: flex !important;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  background: transparent;
+  z-index: 9998;
+  height: var(--header-h);
+}}
+
+/* KONTEN UTAMA TURUN DI BAWAH NAVBAR + HEADER */
+[data-testid="stAppViewContainer"] > .main {{
+  margin-top: calc(var(--nav-h) + var(--header-h));
+}}
+
+/* SIDEBAR JUGA MULAI SETELAH NAVBAR + HEADER */
+[data-testid="stSidebar"] {{
+  top: calc(var(--nav-h) + var(--header-h)) !important;
+  height: calc(100vh - var(--nav-h) - var(--header-h)) !important;
+}}
+
+[data-testid="stSidebar"] .block-container {{
+  padding-top: .5rem !important;
+}}
 
 /* kiri & kanan sama lebar dan di-center */
 .nav-left, .nav-right {{
-  width: 220px; display: flex; justify-content: center; align-items: center;
+  width: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }}
 
 /* menu tepat di tengah */
-.nav-center {{ flex: 1; display: flex; justify-content: center; gap: 2.5rem; }}
-.nav-center a {{ text-decoration: none; color: #444; font-weight: 500; }}
+.nav-center {{
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+}}
+.nav-center a {{
+  text-decoration: none;
+  color: #444;
+  font-weight: 500;
+}}
 .nav-center a.active {{
-  color: #b71c1c; border-bottom: 2px solid #b71c1c; padding-bottom: 4px;
+  color: #b71c1c;
+  border-bottom: 2px solid #b71c1c;
+  padding-bottom: 4px;
 }}
 
 .logo-left {{ height: 150px; }}
 .logo-right {{ height: 65px; }}
+
+/* opsional: sedikit adjustment di mobile */
+@media (max-width: 900px) {{
+  .logo-left {{ height: 120px; }}
+  .nav-center {{ gap: 1.6rem; }}
+}}
 </style>
 
 <div class="navbar">
@@ -130,46 +186,6 @@ st.markdown(
     <img src="data:image/png;base64,{logo_right_b64}" class="logo-right">
   </div>
 </div>
-""",
-    unsafe_allow_html=True,
-)
-
-st.markdown(
-    """
-<style>
-@media (max-width: 900px) {
-  [data-testid="stHeader"]{
-    display: flex !important; position: fixed; top: 90px; left: 0; right: 0;
-    background: transparent; z-index: 1000000;
-  }
-  .navbar{ top: 0; z-index: 999999; }
-  [data-testid="stAppViewContainer"] > .main{ margin-top: 140px; }
-  [data-testid="stSidebar"]{ top: 140px; }
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-st.markdown(
-    """
-<style>
-:root{ --nav-h: 90px; }
-@media (max-width: 900px){
-  [data-testid="stHeader"]{
-    display:flex !important; position:fixed; top:var(--nav-h); left:0; right:0;
-    background:transparent; z-index:1000000; height:48px;
-  }
-  [data-testid="stSidebar"]{
-    top:var(--nav-h) !important;
-    height:calc(100vh - var(--nav-h)) !important;
-  }
-  [data-testid="stSidebar"] .block-container{ padding-top:.5rem !important; }
-  [data-testid="stAppViewContainer"] > .main{
-    margin-top:calc(var(--nav-h) + 48px) !important;
-  }
-}
-</style>
 """,
     unsafe_allow_html=True,
 )
@@ -395,7 +411,7 @@ elif page == "prediksi":
         tfidf_vectorizer, svm_model, rf_model = load_artifacts()
     except Exception as e:
         st.error(f"Gagal memuat artifacts.\nDetail: {e}")
-        
+        st.stop()
 
     # MODEL TERSEDIA
     avail = []
