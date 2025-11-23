@@ -74,25 +74,13 @@ st.markdown(
     f"""
 <style>
 .navbar {{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
-  border-bottom: 3px solid #b71c1c;
-  z-index: 999999;
+  position: fixed; top: 0; left: 0; right: 0; height: 80px;
+  background: #ffffff; display: flex; align-items: center;
+  padding: 0 1.5rem; border-bottom: 3px solid #b71c1c; z-index: 999999;
 }}
-
-[data-testid="stAppViewContainer"] > .main {{
-  margin-top: 90px;
-}}
-[data-testid="stSidebar"] {{
-  top: 90px;
-}}
+/* turunkan konten & sidebar */
+[data-testid="stAppViewContainer"] > .main {{ margin-top: 90px; }}
+[data-testid="stSidebar"] {{ top: 90px; }}
 
 /* kiri & kanan sama lebar dan di-center */
 .nav-left, .nav-right {{
@@ -108,36 +96,6 @@ st.markdown(
 
 .logo-left {{ height: 150px; }}
 .logo-right {{ height: 65px; }}
-
-/* ===== MULAI: ATUR HEADER & TOMBOL SIDEBAR ===== */
-
-/* hilangkan tampilan bar hitam header bawaan */
-[data-testid="stHeader"] {{
-  background: transparent;
-  box-shadow: none;
-}}
-
-/* Geser tombol sidebar ke bawah navbar */
-[data-testid="collapsedControl"] {
-    position: fixed;
-    top: calc(var(--nav-h) + 10px) !important;  /* 10px di bawah navbar */
-    left: 18px !important;
-    z-index: 1000002 !important;
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    transform: none !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* buang tinggi/padding header supaya nggak bikin gap */
-[data-testid="stHeader"] > div:first-child {{
-  height: 0;
-  padding: 0;
-}}
-
-/* ===== SELESAI ===== */
 </style>
 
 <div class="navbar">
