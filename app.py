@@ -24,7 +24,7 @@ st.set_page_config(
     page_title="UlasAnalisa – Prediksi Sentimen",
     page_icon="static/logo_ulas.png",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded",  # pastikan sidebar default-nya terbuka
 )
 
 # SESSION STATE BOOTSTRAP
@@ -78,18 +78,10 @@ st.markdown(
   background: #ffffff; display: flex; align-items: center;
   padding: 0 1.5rem; border-bottom: 3px solid #b71c1c; z-index: 999999;
 }}
-/* turunkan konten & sidebar */
-[data-testid="stAppViewContainer"] > .main {{
-  margin-top: 90px;
-}}
 
-[data-testid="stSidebar"] {{
-  top: 90px;
-  height: calc(100% - 90px);
-  display: block !important;
-  visibility: visible !important;
-  transform: translateX(0) !important;
-}}
+/* turunkan konten & sidebar supaya tidak ketutupan navbar */
+[data-testid="stAppViewContainer"] > .main {{ margin-top: 90px; }}
+[data-testid="stSidebar"] {{ top: 90px; }}
 
 /* kiri & kanan sama lebar dan di-center */
 .nav-left, .nav-right {{
@@ -123,8 +115,6 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
-
-
 
 # NLTK PREP (persisten)
 @st.cache_resource(show_spinner=False)
@@ -348,7 +338,7 @@ elif page == "prediksi":
         st.error("Tidak ada model yang tersedia.")
         st.stop()
 
-    # SIDEBAR
+    # SIDEBAR – pastikan muncul
     with st.sidebar:
         st.header("Pengaturan")
         model_name = st.selectbox("Pilih model", avail, index=0)
