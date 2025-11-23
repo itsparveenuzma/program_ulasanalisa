@@ -79,8 +79,17 @@ st.markdown(
   padding: 0 1.5rem; border-bottom: 3px solid #b71c1c; z-index: 999999;
 }}
 /* turunkan konten & sidebar */
-[data-testid="stAppViewContainer"] > .main {{ margin-top: 90px; }}
-[data-testid="stSidebar"] {{ top: 90px; }}
+[data-testid="stAppViewContainer"] > .main {{
+  margin-top: 90px;
+}}
+
+[data-testid="stSidebar"] {{
+  top: 90px;
+  height: calc(100% - 90px);
+  display: block !important;
+  visibility: visible !important;
+  transform: translateX(0) !important;
+}}
 
 /* kiri & kanan sama lebar dan di-center */
 .nav-left, .nav-right {{
