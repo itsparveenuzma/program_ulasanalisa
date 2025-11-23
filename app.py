@@ -129,8 +129,8 @@ st.markdown(
 
 /* SIDEBAR JUGA MULAI SETELAH NAVBAR + HEADER */
 [data-testid="stSidebar"] {{
-  top: calc(var(--nav-h) + var(--header-h)) !important;
-  height: calc(100vh - var(--nav-h) - var(--header-h)) !important;
+  top: var(--nav-h) !important;
+  height: calc(100vh - var(--nav-h)) !important;
 }}
 
 [data-testid="stSidebar"] .block-container {{
