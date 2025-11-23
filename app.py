@@ -397,7 +397,7 @@ elif page == "prediksi":
 
     # ARTIFACT PATH
     VEC_PATH = Path("Artifacts") / "tfidf_vectorizer.joblib"
-    SVM_PATH = Path("Artifacts") / "svm_rbf_model.joblib"
+    SVM_PATH = Path("Artifacts") / "svm_linear_model.joblib"
     RF_PATH = Path("Artifacts") / "random_forest_model.joblib"
 
     @st.cache_resource
@@ -416,7 +416,7 @@ elif page == "prediksi":
     # MODEL TERSEDIA
     avail = []
     if svm_model is not None:
-        avail.append("SVM (RBF)")
+        avail.append("SVM (Linear)")
     if rf_model is not None:
         avail.append("RandomForest")
     if svm_model is not None and rf_model is not None:
@@ -514,12 +514,12 @@ elif page == "prediksi":
         with st.spinner("Mengubah fitur (TF-IDF) dan memprediksi"):
             X = tfidf_vectorizer.transform(df["text"].astype(str)).toarray()
             results = {}
-            if model_name == "SVM (RBF)":
+            if model_name == "SVM (Linear)":
                 y = svm_model.predict(X)
                 t = df.copy()
                 t["pred"] = y
                 t["pred_label"] = t["pred"].map({1: "Positive", 0: "Negative"})
-                results["SVM (RBF)"] = t
+                results["SVM (Linear)"] = t
             elif model_name == "RandomForest":
                 y = rf_model.predict(X)
                 t = df.copy()
@@ -531,7 +531,7 @@ elif page == "prediksi":
                 t1 = df.copy()
                 t1["pred"] = y_svm
                 t1["pred_label"] = t1["pred"].map({1: "Positive", 0: "Negative"})
-                results["SVM (RBF)"] = t1
+                results["SVM (Linear)"] = t1
 
                 y_rf = rf_model.predict(X)
                 t2 = df.copy()
@@ -545,12 +545,12 @@ elif page == "prediksi":
 
             # Simpan output CSV/Excel
             if st.session_state.is_combo:
-                df_svm = results["SVM (RBF)"]
+                df_svm = results["SVM (Linear)"]
                 df_rf = results["RandomForest"]
 
                 out = io.BytesIO()
                 with pd.ExcelWriter(out, engine="xlsxwriter") as w:
-                    df_svm.to_excel(w, sheet_name="SVM (RBF)", index=False)
+                    df_svm.to_excel(w, sheet_name="SVM (Linear)", index=False)
                     df_rf.to_excel(w, sheet_name="RandomForest", index=False)
                 out.seek(0)
                 st.session_state.csv_pred = out.getvalue()
@@ -563,7 +563,7 @@ elif page == "prediksi":
                 )
                 out2 = io.BytesIO()
                 with pd.ExcelWriter(out2, engine="xlsxwriter") as w:
-                    dist_svm.to_excel(w, sheet_name="SVM (RBF)", index=False)
+                    dist_svm.to_excel(w, sheet_name="SVM (Linear)", index=False)
                     dist_rf.to_excel(w, sheet_name="RandomForest", index=False)
                 out2.seek(0)
                 st.session_state.csv_dist = out2.getvalue()
