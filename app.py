@@ -379,48 +379,65 @@ elif page == "prediksi":
     st.title("Prediksi Sentimen dari Link Google Play")
     st.caption("Masukkan link aplikasi dari Google Play Store, lalu sistem akan prediksi sentimennya")
 
-    # ARTIFACT PATH
+    # -------------------------------
+    # ARTIFACT PATH + CEK FILE
+    # -------------------------------
     VEC_PATH = Path("Artifacts") / "tfidf_vectorizer.joblib"
     SVM_PATH = Path("Artifacts") / "svm_rbf_model.joblib"
     RF_PATH = Path("Artifacts") / "random_forest_model.joblib"
 
-    @st.cache_resource
-    def load_artifacts():
-        vec = joblib.load(VEC_PATH)
-        svm = joblib.load(SVM_PATH) if SVM_PATH.exists() else None
-        rf = joblib.load(RF_PATH) if RF_PATH.exists() else None
-        return vec, svm, rf
+    svm_exists = SVM_PATH.exists()
+    rf_exists = RF_PATH.exists()
 
-    try:
-        tfidf_vectorizer, svm_model, rf_model = load_artifacts()
-    except Exception as e:
-        st.error(f"Gagal memuat artifacts.\nDetail: {e}")
-        st.stop()
-
-    # MODEL TERSEDIA
     avail = []
-    if svm_model is not None:
+    if svm_exists:
         avail.append("SVM (RBF)")
-    if rf_model is not None:
+    if rf_exists:
         avail.append("RandomForest")
-    if svm_model is not None and rf_model is not None:
+    if svm_exists and rf_exists:
         avail.append("SVM dan RandomForest")
 
-    if not avail:
-        st.error("Tidak ada model yang tersedia.")
-        st.stop()
-
-    # SIDEBAR
+    # -------------------------------
+    # SIDEBAR SELALU DIBUAT DULU
+    # -------------------------------
     with st.sidebar:
         st.header("Pengaturan")
-        model_name = st.selectbox("Pilih model", avail, index=0)
+
+        if not avail:
+            # Sidebar tetap muncul, tapi kasih info jelas
+            st.error(
+                "Model belum ditemukan di server.\n\n"
+                "Pastikan folder **Artifacts/** dan file:\n"
+                "- tfidf_vectorizer.joblib\n"
+                "- svm_rbf_model.joblib (opsional)\n"
+                "- random_forest_model.joblib (opsional)\n"
+                "sudah di-upload ke project deploy."
+            )
+            model_name = None
+        else:
+            model_name = st.selectbox("Pilih model", avail, index=0)
+
         lang = st.selectbox("Bahasa ulasan", ["id", "en"], index=0)
         country = st.selectbox("Negara", ["id", "us"], index=0)
         n_reviews = st.slider("Jumlah ulasan di-scrape", 50, 1000, 200, 50)
         sort_opt = st.selectbox("Urutkan", ["NEWEST", "MOST_RELEVANT"], index=0)
         run = st.button("Prediksi")
 
-    # HELPER SCRAPE
+    st.session_state["scrape_n"] = n_reviews
+
+    # -------------------------------
+    # LOAD ARTIFACTS (dipanggil saat run)
+    # -------------------------------
+    @st.cache_resource
+    def load_artifacts():
+        vec = joblib.load(VEC_PATH)
+        svm = joblib.load(SVM_PATH) if svm_exists else None
+        rf = joblib.load(RF_PATH) if rf_exists else None
+        return vec, svm, rf
+
+    # -------------------------------
+    # HELPER SCRAPE & UTIL
+    # -------------------------------
     ID_RE = re.compile(r"[?&]id=([a-zA-Z0-9._]+)")
 
     def parse_app_id(text: str) -> str:
@@ -448,23 +465,51 @@ elif page == "prediksi":
             return pd.DataFrame(columns=["content", "score", "at", "replyContent", "userName"])
         return pd.DataFrame(got)
 
-    st.session_state["scrape_n"] = n_reviews
-
-    # helper simpan figure ke bytes (PNG)
     def fig_to_png_bytes(fig):
         buf = io.BytesIO()
         fig.savefig(buf, format="png", bbox_inches="tight", dpi=160)
         buf.seek(0)
         return buf.read()
 
+    # -------------------------------
     # INPUT LINK
+    # -------------------------------
     link = st.text_input(
         "Masukkan link Google Play / package id",
         placeholder="https://play.google.com/store/apps/details?id=com.zhiliaoapp.musically",
     )
 
+    # -------------------------------
     # PROSES PREDIKSI
+    # -------------------------------
     if run:
+
+        if not avail or model_name is None:
+            st.error("Model belum tersedia di server. Upload dulu file di folder **Artifacts/**.")
+            st.stop()
+
+        # load model/vectorizer baru di sini (tidak mengganggu sidebar)
+        try:
+            tfidf_vectorizer, svm_model, rf_model = load_artifacts()
+        except Exception as e:
+            st.error(f"Gagal memuat artifacts.\nDetail: {e}")
+            st.stop()
+
+        # MODEL TERSEDIA (berdasarkan objek yang berhasil di-load)
+        avail_runtime = []
+        if svm_model is not None:
+            avail_runtime.append("SVM (RBF)")
+        if rf_model is not None:
+            avail_runtime.append("RandomForest")
+        if svm_model is not None and rf_model is not None:
+            avail_runtime.append("SVM dan RandomForest")
+
+        if model_name not in avail_runtime:
+            st.error("Pilihan model tidak sesuai dengan model yang tersedia di server.")
+            st.stop()
+
+        # --- lanjut persis seperti kode kamu sebelumnya ---
+
         app_id = parse_app_id(link)
         if not app_id:
             st.error("Package id tidak valid.")
@@ -489,12 +534,13 @@ elif page == "prediksi":
             st.warning("Tidak ada ulasan yang diambil.")
             st.stop()
 
-        # rapikan kolom
+        # ====== mulai bagian lama kamu (rapikan kolom, tfidf, prediksi, grafik, download, dst) ======
+        # (blok berikut ini bisa kamu biarkan sama persis seperti kode yang sudah kamu punya)
+        # -------------------------------------------------------------------
         df = df.rename(columns={"content": "text", "score": "rating", "at": "date"})
         cols = ["text", "rating", "date", "userName", "replyContent"]
         df = df[[c for c in cols if c in df.columns]].copy()
 
-        # tf-idf + prediksi
         with st.spinner("Mengubah fitur (TF-IDF) dan memprediksi"):
             X = tfidf_vectorizer.transform(df["text"].astype(str)).toarray()
             results = {}
@@ -526,7 +572,7 @@ elif page == "prediksi":
             st.session_state.results = results
             st.session_state.app_id = app_id
             st.session_state.is_combo = (model_name == "SVM dan RandomForest")
-
+            
             # Simpan output CSV/Excel
             if st.session_state.is_combo:
                 df_svm = results["SVM (RBF)"]
