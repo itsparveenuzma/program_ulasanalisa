@@ -767,18 +767,30 @@ elif page == "prediksi":
                     top_words_tables.append(df_top)
 
                     # grafik bar horizontal Top 10 kata
-                    chart = (
+                     # grafik bar horizontal Top 10 kata + label angka
+                    base = (
                         alt.Chart(df_top)
-                        .mark_bar()
                         .encode(
                             x=alt.X("count:Q", title="Frekuensi"),
                             y=alt.Y("word:N", sort="-x", title="Kata"),
-                            tooltip=[
-                                alt.Tooltip("word:N", title="Kata"),
-                                alt.Tooltip("count:Q", title="Jumlah"),
-                            ],
                         )
-                    ).properties(height=260)
+                    )
+
+                    bars = base.mark_bar()
+
+                    # angka di ujung bar
+                    text_labels = base.mark_text(
+                        align="left",
+                        baseline="middle",
+                        dx=3  # geser sedikit ke kanan ujung bar
+                    ).encode(
+                        text=alt.Text("count:Q", format="d")
+                    )
+
+                    chart = (bars + text_labels).properties(
+                        height=260,
+                        title=f"Top 10 Kata – Sentimen {label}"
+                    )
 
                     st.altair_chart(chart, use_container_width=True)
 
