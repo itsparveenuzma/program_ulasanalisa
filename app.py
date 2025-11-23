@@ -73,33 +73,25 @@ tentang_active = "active" if page == "tentang" else ""
 st.markdown(
     f"""
 <style>
-/* tinggi header default kira-kira 3.5rem */
-:root {{
-  --st-header-h: 3.5rem;
-  --nav-h: 80px;
-}}
-
-/* NAVBAR DIPASANG DI BAWAH HEADER STREAMLIT */
 .navbar {{
   position: fixed;
-  top: var(--st-header-h);   /* bukan 0 lagi */
+  top: 0;
   left: 0;
   right: 0;
-  height: var(--nav-h);
+  height: 80px;
   background: #ffffff;
   display: flex;
   align-items: center;
   padding: 0 1.5rem;
   border-bottom: 3px solid #b71c1c;
-  z-index: 900;              /* lebih kecil dari header bawaan */
+  z-index: 999999;
 }}
 
-/* turunkan konten & sidebar: header + navbar */
 [data-testid="stAppViewContainer"] > .main {{
-  margin-top: calc(var(--st-header-h) + var(--nav-h));
+  margin-top: 90px;
 }}
-section[data-testid="stSidebar"] {{
-  top: calc(var(--st-header-h) + 0px);
+[data-testid="stSidebar"] {{
+  top: 90px;
 }}
 
 /* kiri & kanan sama lebar dan di-center */
@@ -117,11 +109,33 @@ section[data-testid="stSidebar"] {{
 .logo-left {{ height: 150px; }}
 .logo-right {{ height: 65px; }}
 
-/* pastikan tombol hamburger tidak disembunyikan style lain */
-[data-testid="collapsedControl"] {{
-  visibility: visible !important;
-  opacity: 1 !important;
+/* ===== MULAI: ATUR HEADER & TOMBOL SIDEBAR ===== */
+
+/* hilangkan tampilan bar hitam header bawaan */
+[data-testid="stHeader"] {{
+  background: transparent;
+  box-shadow: none;
 }}
+
+/* geser tombol hamburger ke tengah navbar */
+[data-testid="collapsedControl"] {{
+  position: fixed;
+  top: 24px !important;   /* naik-turun di sini kalau mau */
+  left: 18px !important;
+  z-index: 1000002 !important;   /* di atas navbar */
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transform: none !important;
+}}
+
+/* buang tinggi/padding header supaya nggak bikin gap */
+[data-testid="stHeader"] > div:first-child {{
+  height: 0;
+  padding: 0;
+}}
+
+/* ===== SELESAI ===== */
 </style>
 
 <div class="navbar">
