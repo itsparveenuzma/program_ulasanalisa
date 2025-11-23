@@ -332,7 +332,7 @@ elif page == "tentang":
 <style>
 .about-title-wrap{
   width:100%; display:flex; justify-content:center; align-items:center;
-  margin: 6px 0 22px;
+  margin: 20px 0 22px;
 }
 .about-title-wrap span{
   font-weight:800; font-size: clamp(26px, 3.0vw, 40px);
@@ -397,7 +397,7 @@ elif page == "prediksi":
 
     # ARTIFACT PATH
     VEC_PATH = Path("Artifacts") / "tfidf_vectorizer.joblib"
-    SVM_PATH = Path("Artifacts") / "svm_linear_model.joblib"
+    SVM_PATH = Path("Artifacts") / "svm_linea_model.joblib"
     RF_PATH = Path("Artifacts") / "random_forest_model.joblib"
 
     @st.cache_resource
